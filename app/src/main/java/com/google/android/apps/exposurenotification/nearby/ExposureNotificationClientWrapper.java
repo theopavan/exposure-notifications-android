@@ -18,6 +18,8 @@
 package com.google.android.apps.exposurenotification.nearby;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import com.google.android.apps.exposurenotification.storage.ExposureNotificationSharedPreferences.OnboardingStatus;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.exposurenotification.ExposureConfiguration;
 import com.google.android.gms.nearby.exposurenotification.ExposureInformation;
@@ -28,6 +30,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.common.collect.Lists;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -43,6 +46,12 @@ public class ExposureNotificationClientWrapper {
   public static final String FAKE_TOKEN_2 = "FAKE_TOKEN_2";
   public static final String FAKE_TOKEN_3 = "FAKE_TOKEN_3";
 
+  //TODO TESTE
+  private static final String STARTED_TESTE = "STARTED_TESTE";
+  private final SharedPreferences sharedPreferences;
+  private static final String SHARED_PREFERENCES_FILE =
+      "ExposureNotificationSharedPreferences.SHARED_PREFERENCES_FILE_TESTE";
+
   public static ExposureNotificationClientWrapper get(Context context) {
     if (INSTANCE == null) {
       INSTANCE = new ExposureNotificationClientWrapper(context);
@@ -52,22 +61,45 @@ public class ExposureNotificationClientWrapper {
 
   ExposureNotificationClientWrapper(Context context) {
     exposureNotificationClient = Nearby.getExposureNotificationClient(context);
+
+    //TODO TESTE
+    sharedPreferences = context.getSharedPreferences(SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
   }
 
   public Task<Void> start() {
-    return exposureNotificationClient.start();
+    //TODO TESTE
+    //return exposureNotificationClient.start();
+    sharedPreferences.edit().putBoolean(STARTED_TESTE, true).apply();
+    return Tasks.forResult(null);
   }
 
   public Task<Void> stop() {
-    return exposureNotificationClient.stop();
+    //TODO TESTE
+    //return exposureNotificationClient.stop();
+    sharedPreferences.edit().putBoolean(STARTED_TESTE, false).apply();
+    return Tasks.forResult(null);
   }
 
   public Task<Boolean> isEnabled() {
-    return exposureNotificationClient.isEnabled();
+    //TODO TESTE
+    //return exposureNotificationClient.isEnabled();
+    return Tasks.forResult(sharedPreferences.getBoolean(STARTED_TESTE, false));
   }
 
   public Task<List<TemporaryExposureKey>> getTemporaryExposureKeyHistory() {
-    return exposureNotificationClient.getTemporaryExposureKeyHistory();
+    //TODO TESTE
+    //return exposureNotificationClient.getTemporaryExposureKeyHistory();
+    try {
+      return Tasks.forResult(Lists.newArrayList(
+          new TemporaryExposureKey.TemporaryExposureKeyBuilder()
+              .setKeyData("FAKE_KEY_TESTE_1".getBytes("UTF-8"))
+              .setTransmissionRiskLevel(4)
+              .build()
+      ));
+    } catch (UnsupportedEncodingException e) {
+      e.printStackTrace();
+      throw new RuntimeException();
+    }
   }
 
   /**
